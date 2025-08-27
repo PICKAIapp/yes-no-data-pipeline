@@ -1,5 +1,5 @@
 """
-PICKAI Real-time Data Pipeline
+yes-no.fun Real-time Data Pipeline
 High-throughput stream processing with Apache Kafka and Apache Beam
 """
 
@@ -22,7 +22,7 @@ class MarketEventProcessor(DoFn):
     
     def __init__(self):
         self.processed_events = set()
-        self.metrics_namespace = 'pickai.pipeline'
+        self.metrics_namespace = 'yes-no.pipeline'
         
     def setup(self):
         """Initialize connections and caches"""
@@ -283,10 +283,10 @@ def run_pipeline():
     
     options = PipelineOptions([
         '--runner=DataflowRunner',
-        '--project=pickai-production',
+        '--project=yes-no-production',
         '--region=us-central1',
-        '--temp_location=gs://pickai-temp/dataflow',
-        '--staging_location=gs://pickai-staging/dataflow',
+        '--temp_location=gs://yes-no-temp/dataflow',
+        '--staging_location=gs://yes-no-staging/dataflow',
         '--streaming',
         '--enable_streaming_engine',
         '--autoscaling_algorithm=THROUGHPUT_BASED',
@@ -301,7 +301,7 @@ def run_pipeline():
             | 'ReadFromKafka' >> ReadFromKafka(
                 consumer_config={
                     'bootstrap.servers': 'kafka-cluster:9092',
-                    'group.id': 'pickai-pipeline',
+                    'group.id': 'yes-no-pipeline',
                     'auto.offset.reset': 'latest'
                 },
                 topics=['market-events', 'user-actions', 'oracle-updates']
@@ -337,7 +337,7 @@ def run_pipeline():
         
         # Write to BigQuery
         processed | 'WriteToBigQuery' >> WriteToBigQuery(
-            table='pickai-production:warehouse.market_events',
+            table='yes-no-production:warehouse.market_events',
             schema='SCHEMA_AUTODETECT',
             write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND
         )
